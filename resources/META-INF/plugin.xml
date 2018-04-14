@@ -1,17 +1,14 @@
 <idea-plugin>
-    <id>com.your.company.unique.plugin.id</id>
-    <name>Plugin display name here</name>
-    <version>1.0</version>
-    <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+    <id>com.garage.works.xpathValidator</id>
+    <name>Xpath Validator</name>
+    <version>0.1</version>
+    <vendor email="2006.mib@gmail.com" url="">GarageWorks</vendor>
 
     <description><![CDATA[
-      Enter short description for your plugin here.<br>
-      <em>most HTML tags may be used</em>
+Plugin for search an xpath expression in code and check if for particular expression at least one element is present on specified web page
     ]]></description>
 
     <change-notes><![CDATA[
-      Add change notes here.<br>
-      <em>most HTML tags may be used</em>
     ]]>
     </change-notes>
 
@@ -27,15 +24,10 @@
     </extensions>
 
     <actions>
-        <group id="actions.ResolvingAction" text="Action _Text" description="Action Text Descr">
+        <group id="actions.ResolvingAction" text="Validate xpath" description="">
             <add-to-group group-id="MainMenu" anchor="last"/>
-            <!--<action id="xpathResolver.ResolvingAction" class="actions.ResolvingAction" text="Text _Boxes"-->
-                    <!--description="A test menu item"/>-->
-            <!--</group>-->
-            <!--<group id="xpathResolver.EditorAction" text="Editor _Text" description="Editor Text Descr">-->
-            <!--<add-to-group group-id="MainMenu" anchor="last"/>-->
-            <action id="xpathResolver.EditorAction" class="actions.EditorAction" text="_EditorHighlight"
-                    description="highlighting Description"/>
+            <action id="xpathResolver.EditorAction" class="actions.EditorAction" text="Set Web Page"
+                    description=""/>
         </group>
     </actions>
 
