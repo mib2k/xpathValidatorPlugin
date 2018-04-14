@@ -42,9 +42,12 @@ public class EditorAction extends AnAction {
         Arrays.stream(editor.getMarkupModel().getAllHighlighters()).forEach(RangeMarker::dispose);
         Document document = editor.getDocument();
         String url = Messages.showInputDialog(project, "Enter valid URL", "Enter valid URL", Messages.getQuestionIcon());
+        if (url == null || url.isEmpty()) {
+            return;
+        }
         String urlToCheck = null;
         try {
-            assert url != null;
+
             if (!url.startsWith("http")) {
                 urlToCheck = "http://" + url;
             } else urlToCheck = url;
