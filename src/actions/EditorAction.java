@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class EditorAction extends AnAction {
-    Project project;
+    private Project project;
 
     @Override
     public void update(AnActionEvent e) {
@@ -39,6 +39,11 @@ public class EditorAction extends AnAction {
     @Override
     public void actionPerformed(AnActionEvent e) {
         final Editor editor = e.getData(CommonDataKeys.EDITOR);
+
+        if (editor == null) {
+            return;
+        }
+
         Arrays.stream(editor.getMarkupModel().getAllHighlighters()).forEach(RangeMarker::dispose);
         Document document = editor.getDocument();
         String url = Messages.showInputDialog(project, "Enter valid URL", "Enter valid URL", Messages.getQuestionIcon());
