@@ -1,12 +1,15 @@
 package Utils;
 
 
+import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriverService;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -39,7 +42,17 @@ public class DriverUtils {
     public static WebClient getHtmlUnitClient() {
         if (client == null) {
             client = new WebClient();
+            client.setAjaxController(new NicelyResynchronizingAjaxController());
+            client.getOptions().setPrintContentOnFailingStatusCode(false);
+            client.getOptions().setThrowExceptionOnFailingStatusCode(true);
+            client.getOptions().setCssEnabled(false);
+            client.getOptions().setJavaScriptEnabled(false);
+            client.getOptions().setUseInsecureSSL(true);
         }
         return client;
+    }
+
+    public static HtmlPage openPage(String urlToCheck) throws IOException {
+        return DriverUtils.getHtmlUnitClient().getPage(urlToCheck);
     }
 }

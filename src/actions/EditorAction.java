@@ -1,11 +1,13 @@
 package actions;
 
 import Utils.DriverUtils;
+import Utils.SharedData;
 import Utils.XpathDetector;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.RangeMarker;
@@ -14,15 +16,14 @@ import com.intellij.openapi.editor.markup.HighlighterTargetArea;
 import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.ui.JBColor;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
+import java.awt.*;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class EditorAction extends AnAction {
     private Project project;
@@ -39,64 +40,41 @@ public class EditorAction extends AnAction {
     @Override
     public void actionPerformed(AnActionEvent e) {
         final Editor editor = e.getData(CommonDataKeys.EDITOR);
-
         if (editor == null) {
             return;
         }
 
         Arrays.stream(editor.getMarkupModel().getAllHighlighters()).forEach(RangeMarker::dispose);
         Document document = editor.getDocument();
-        String url = Messages.showInputDialog(project, "Enter valid URL", "Enter valid URL", Messages.getQuestionIcon());
-        if (url == null || url.isEmpty()) {
-            return;
-        }
-        String urlToCheck = null;
-        try {
-
-            if (!url.startsWith("http")) {
-                urlToCheck = "http://" + url;
-            } else urlToCheck = url;
-
-            new URL(urlToCheck);
-        } catch (MalformedURLException e1) {
-            Messages.showMessageDialog(project, String.format("URL %s is invalid", urlToCheck), "Warning",
-                    Messages.getWarningIcon());
-            return;
-        }
-
-        final String verifiedUrl = urlToCheck;
+        final String verifiedUrl = SharedData.getUrl();
         List<String> xpathCollection = XpathDetector.detectXpathExpressions(document.getText());
 
-        TextAttributes myAttr = new TextAttributes(JBColor.BLACK, JBColor.PINK, null, null, 5);
-        Runnable r = () -> {
+        TextAttributes myAttr = new TextAttributes(Color.BLACK, new Color(146, 204, 255), null, null, 5);
+
+        AtomicReference<HtmlPage> htmlPage = new AtomicReference<>();
+        Callable r = () -> {
             try {
-                validateExpressions(xpathCollection, verifiedUrl).forEach(xpression -> highlight(editor, document, myAttr, xpression));
+                htmlPage.set(DriverUtils.openPage(verifiedUrl));
+                return "";
             } catch (Exception ex) {
-                Messages.showMessageDialog(project, String.format("Unable to open URL %s", verifiedUrl), "Warning",
-                        Messages.getWarningIcon());
+                return String.format("Unable to open URL %s\n%s", verifiedUrl, ex.toString());
             }
         };
-        r.run();
 
-    }
 
-    private List<String> validateExpressions(List<String> xpathCollection, String urlToCheck) {
-        HtmlPage page;
+        Future future = ApplicationManager.getApplication().executeOnPooledThread(r);
         try {
-            page = DriverUtils.getHtmlUnitClient().getPage(urlToCheck);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return new ArrayList<>();
+            String result = future.get().toString();
+            if (result != null && !result.isEmpty()) {
+                Messages.showMessageDialog(project, result, "Warning",
+                        Messages.getWarningIcon());
+            } else {
+                XpathDetector.validateExpressions(xpathCollection, htmlPage.get()).forEach(xpression -> highlight(editor, document, myAttr, xpression));
+            }
+        } catch (InterruptedException | ExecutionException e1) {
+            e1.printStackTrace();
         }
-
-        HtmlPage finalPage = page;
-        return xpathCollection.stream().filter(xpath -> {
-            List<?> elements = finalPage.getByXPath(xpath);
-            return elements.size() == 0;
-        }).collect(Collectors.toList());
-
-
-    }
+}
 
     private void highlight(Editor editor, Document document, TextAttributes myAttr, String xpression) {
         int startOffset = 0;

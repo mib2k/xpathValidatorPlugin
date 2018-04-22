@@ -5,7 +5,8 @@
     <vendor email="2006.mib@gmail.com" url="">GarageWorks</vendor>
 
     <description><![CDATA[
-Plugin for search an xpath expression in code and check if for particular expression at least one element is present on specified web page
+Plugin for search an xpath expression in code and check if for particular expression at least one element is present on specified web page.
+Please note: plugin is using HtmlUnit for opening pages so if you experience SSLExceptions you need to try set specific System Properties.
     ]]></description>
 
     <change-notes><![CDATA[
@@ -13,7 +14,7 @@ Plugin for search an xpath expression in code and check if for particular expres
     </change-notes>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-    <idea-version since-build="173.0"/>
+    <idea-version since-build="181.0"/>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
@@ -24,9 +25,11 @@ Plugin for search an xpath expression in code and check if for particular expres
     </extensions>
 
     <actions>
-        <group id="actions.ResolvingAction" text="Validate xpath" description="">
+        <group id="actions.EditorAction" text="Validate xpath" description="">
             <add-to-group group-id="MainMenu" anchor="last"/>
-            <action id="xpathResolver.EditorAction" class="actions.EditorAction" text="Set Web Page"
+            <action id="xpathResolver.EditorAction" class="actions.EditorAction" text="Validate"
+                    description=""/>
+            <action id="xpathResolver.SetPageAction" class="actions.SaveStateAction" text="Set Web Page"
                     description=""/>
         </group>
     </actions>
