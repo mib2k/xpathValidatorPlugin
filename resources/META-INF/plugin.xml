@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.garage.works.xpathValidator</id>
     <name>Xpath Validator</name>
-    <version>0.1</version>
+    <version>0.2</version>
     <vendor email="2006.mib@gmail.com" url="">GarageWorks</vendor>
 
     <description><![CDATA[
@@ -10,6 +10,8 @@ Please note: plugin is using HtmlUnit for opening pages so if you experience SSL
     ]]></description>
 
     <change-notes><![CDATA[
+    Added compatibility with newer IDE versions
+    Implemented dynamic XPath handling
     ]]>
     </change-notes>
 
