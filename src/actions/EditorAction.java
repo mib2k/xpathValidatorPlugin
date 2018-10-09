@@ -16,6 +16,7 @@ import com.intellij.openapi.editor.markup.HighlighterTargetArea;
 import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.ui.JBColor;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -44,12 +45,13 @@ public class EditorAction extends AnAction {
             return;
         }
 
-        Arrays.stream(editor.getMarkupModel().getAllHighlighters()).forEach(RangeMarker::dispose);
         Document document = editor.getDocument();
-        final String verifiedUrl = SharedData.getUrl();
         List<String> xpathCollection = XpathDetector.detectXpathExpressions(document.getText());
 
-        TextAttributes myAttr = new TextAttributes(Color.BLACK, new Color(146, 204, 255), null, null, 5);
+        Arrays.stream(editor.getMarkupModel().getAllHighlighters()).forEach(RangeMarker::dispose);
+        final String verifiedUrl = SharedData.getUrl();
+
+        TextAttributes myAttr = new TextAttributes(JBColor.BLACK, new Color(146, 204, 255), null, null, 5);
 
         AtomicReference<HtmlPage> htmlPage = new AtomicReference<>();
         Callable r = () -> {
@@ -74,7 +76,7 @@ public class EditorAction extends AnAction {
         } catch (InterruptedException | ExecutionException e1) {
             e1.printStackTrace();
         }
-}
+    }
 
     private void highlight(Editor editor, Document document, TextAttributes myAttr, String xpression) {
         int startOffset = 0;

@@ -18,6 +18,11 @@ public class SaveStateAction extends AnAction {
         String url = Messages.showInputDialog(project, "Set WebPage", "Enter valid URL",
                 Messages.getQuestionIcon(), SharedData.getUrl(), new UrlValidator());
 
+        if (url == null || url.isEmpty()) {
+            Messages.showErrorDialog("URL cannot be empty", "Enter valid URL");
+            return;
+        }
+
         String urlToCheck;
         if (!url.startsWith("http")) {
             urlToCheck = "http://" + url;
