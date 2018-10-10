@@ -14,12 +14,12 @@ public class SaveStateAction extends AnAction {
         if (project == null) {
             return;
         }
-
-        String url = Messages.showInputDialog(project, "Set WebPage", "Enter valid URL",
+        String titleMessage = "Enter Valid URL";
+        String url = Messages.showInputDialog(project, "Set WebPage", titleMessage,
                 Messages.getQuestionIcon(), SharedData.getUrl(), new UrlValidator());
 
         if (url == null || url.isEmpty()) {
-            Messages.showErrorDialog("URL cannot be empty", "Enter valid URL");
+            Messages.showErrorDialog("URL cannot be empty", titleMessage);
             return;
         }
 

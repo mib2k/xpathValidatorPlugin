@@ -16,9 +16,9 @@ import com.intellij.openapi.editor.markup.HighlighterTargetArea;
 import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.ui.JBColor;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -48,11 +48,7 @@ public class EditorAction extends AnAction {
         Document document = editor.getDocument();
         List<String> xpathCollection = XpathDetector.detectXpathExpressions(document.getText());
 
-        Arrays.stream(editor.getMarkupModel().getAllHighlighters()).forEach(RangeMarker::dispose);
         final String verifiedUrl = SharedData.getUrl();
-
-        TextAttributes myAttr = new TextAttributes(JBColor.BLACK, new Color(146, 204, 255), null, null, 5);
-
         AtomicReference<HtmlPage> htmlPage = new AtomicReference<>();
         Callable r = () -> {
             try {
@@ -62,16 +58,22 @@ public class EditorAction extends AnAction {
                 return String.format("Unable to open URL %s\n%s", verifiedUrl, ex.toString());
             }
         };
-
-
         Future future = ApplicationManager.getApplication().executeOnPooledThread(r);
+
+        List<String> broken = new ArrayList<>();
+        List<String> error = new ArrayList<>();
+        TextAttributes brokenPathAttribute = new TextAttributes(Color.BLACK, new Color(146, 204, 255), null, null, 5);
+        TextAttributes errorPathAttribute = new TextAttributes(Color.BLACK, new Color(255, 59, 53), null, null, 5);
         try {
             String result = future.get().toString();
             if (result != null && !result.isEmpty()) {
                 Messages.showMessageDialog(project, result, "Warning",
                         Messages.getWarningIcon());
             } else {
-                XpathDetector.validateExpressions(xpathCollection, htmlPage.get()).forEach(xpression -> highlight(editor, document, myAttr, xpression));
+                XpathDetector.validateExpressions(xpathCollection, htmlPage.get(), broken, error);
+                Arrays.stream(editor.getMarkupModel().getAllHighlighters()).forEach(RangeMarker::dispose);
+                broken.forEach(xpression -> highlight(editor, document, brokenPathAttribute, xpression));
+                error.forEach(xpression -> highlight(editor, document, errorPathAttribute, xpression));
             }
         } catch (InterruptedException | ExecutionException e1) {
             e1.printStackTrace();
@@ -88,7 +90,8 @@ public class EditorAction extends AnAction {
             }
             int toIndex = fromIndex + xpression.length();
             startOffset = toIndex;
-            editor.getMarkupModel().addRangeHighlighter(fromIndex, toIndex, HighlighterLayer.ERROR, myAttr, HighlighterTargetArea.EXACT_RANGE);
+            editor.getMarkupModel()
+                  .addRangeHighlighter(fromIndex, toIndex, HighlighterLayer.ERROR, myAttr, HighlighterTargetArea.EXACT_RANGE);
         }
     }
 }

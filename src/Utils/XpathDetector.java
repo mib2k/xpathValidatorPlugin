@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class XpathDetector {
     private static final String xpathPattern = "(\"\\(*//.*?\")";
@@ -24,10 +23,16 @@ public class XpathDetector {
         return result;
     }
 
-    public static List<String> validateExpressions(List<String> xpathCollection, HtmlPage htmlPage) {
-        return xpathCollection.stream().filter(xpath -> {
-            List<?> elements = htmlPage.getByXPath(xpath);
-            return elements.size() == 0;
-        }).collect(Collectors.toList());
+    public static void validateExpressions(List<String> xpathCollection, HtmlPage htmlPage, List<String> broken, List<String> error) {
+        xpathCollection.forEach(xpath -> {
+            try {
+                List<?> elements = htmlPage.getByXPath(xpath);
+                if (elements.isEmpty()) {
+                    broken.add(xpath);
+                }
+            } catch (Exception ex) {
+                error.add(xpath);
+            }
+        });
     }
 }
